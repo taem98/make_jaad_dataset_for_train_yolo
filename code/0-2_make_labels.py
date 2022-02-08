@@ -24,7 +24,7 @@ def parsing_annotation(path, name):
     # removed ped
 
     for x in annotations:
-        if x.attrib['label'] == 'pedestrian':
+        if (x.attrib['label'] == 'pedestrian') or (x.attrib['label'] == 'ped'):
             new_annotations.append(x)
             
     return new_annotations
@@ -41,55 +41,42 @@ def read_video_names(jaad_split_videos_path, split_v):
    return video_names
 
 
-
-
 def save_labels(split_v, video_names, jaad_path):
     '''
     split_v : test.txt or train.txt or val.txt
     '''
 
     # make split_v dir
-    split_path = './data/{}'.format(split_v)
+    split_path = '../datas/{}'.format(split_v[:-4])
+    print(split_path)
     os.makedirs(split_path, exist_ok=True)
 
     for video_name in video_names:
         # make video_name dir
         os.makedirs(split_path+'/'+video_name, exist_ok=True)
         annotations = parsing_annotation(jaad_path+"annotations/", video_name+'.xml') 
+        print(jaad_path+"annotations/", video_name+'.xml')
+        if not len(annotations):
+            print("'{}' doesn't have person".format(video_name))
+            continue
+
+        # print(video_name)
         for track in annotations:
             for box in track:
-                # print(box.attrib['frame'], box.attrib['xbr'], box.attrib['xtl'], box.attrib['ybr'], box.attrib['ytl'])
-                # save txt
-                sys.stdout = open(./split_path/'{}'.format(video_name).txt,'w')
-                 
-        
-    
-    
-    # annotations = parsing_annotation(vid_path+"annotations/", vid_name+'.xml') 
-    # checking the existence of a person
-    # if not len(annotations):
-    #     print("'{}' doesn't have person".format(vid_name))
-    #     return
-    
-    # for track in annotations:
-    #     for box in track:
-            # print(box.attrib['frame'], box.attrib['xbr'], box.attrib['xtl'], box.attrib['ybr'], box.attrib['ytl'])
-            # 66 1919.0 1839.0 1079.0 498.0 [example]
+                with open(split_path+'/'+video_name+'/{}.txt'.format(box.attrib['frame'].zfill(4)), 'a') as f:
+                    data = "0 "+box.attrib['xbr']+" "+box.attrib['xtl']+" "+box.attrib['ybr']+" "+box.attrib['ytl']
+                    f.write(data+'\n')
+            
 
-    
-
-
-def start(vid_path, vid_name):
+def start(JAAD_path):
    
     '''
     [lrgc] - str
 
     [mnm] - str
     '''
-
-    jaad_path = '/home/msis/Desktop/project/JAAD/'
     
-    jaad_split_videos_path = jaad_path + 'split_ids/all_videos/'
+    jaad_split_videos_path = JAAD_path + 'split_ids/all_videos/'
     
     split_list = ['test.txt', 'train.txt', 'val.txt']
     
@@ -97,18 +84,13 @@ def start(vid_path, vid_name):
     for split_v in split_list:
         video_names = read_video_names(jaad_split_videos_path, split_v)
         
-        save_labels(split_v, video_names, jaad_path)
+        save_labels(split_v, video_names, JAAD_path)
+        # break
     
 
 
 if __name__ == "__main__":
     # JAAD path
-    VID_PATH = '/home/msis/Desktop/project/JAAD/' 
-    # VID_NAME = 'video_0001'
-    for num in range(346):
-        VID_NAME = 'video_{0:04}'.format(num+1)
-        start(VID_PATH, VID_NAME)
-        break
+    JAAD_PATH ='/media/taemi/Elements/JAAD/'
 
-
-# test_txt = "/home/msis/Desktop/project/JAAD/split_ids/all_videos"
+    start(JAAD_PATH)
