@@ -2,6 +2,7 @@ import cv2
 from xml.etree.ElementTree import parse
 import sys
 import pickle
+import math
 import os
 
 
@@ -64,7 +65,16 @@ def save_labels(split_v, video_names, jaad_path):
         for track in annotations:
             for box in track:
                 with open(split_path+'/'+video_name+'/{}.txt'.format(box.attrib['frame'].zfill(4)), 'a') as f:
-                    data = "0 "+box.attrib['xbr']+" "+box.attrib['xtl']+" "+box.attrib['ybr']+" "+box.attrib['ytl']
+                    xtl = float(box.attrib['xtl'])
+                    xbr = float(box.attrib['xbr'])
+                    ytl = float(box.attrib['ytl'])
+                    ybr = float(box.attrib['ybr'])
+
+                    x_mid = math.trunc(xtl + ((xbr - xtl) / 2 ))
+                    y_mid = math.trunc(ytl + ((ybr - ytl) / 2 ))
+                    width = xbr - xtl
+                    height = ybr - ytl
+                    data = "0 "+str(x_mid)+" "+str(y_mid)+" "+str(width)+" "+str(height)
                     f.write(data+'\n')
             
 
